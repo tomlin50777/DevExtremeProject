@@ -56,7 +56,8 @@ var vectorMapoption = {
     }
 };
 function DataPacket(data) {
-    var colorClass = {};
+    var lineColorClass = {};
+    var bodyColorClass = {};
     var colors;
     var layers = [];
     var backgroundData = {
@@ -72,30 +73,49 @@ function DataPacket(data) {
     });
 
     for (var count = 0; count < data.Boxinfos.length; count++) {
-        if (!colorClass.hasOwnProperty(data.Boxinfos[count].LineColor))
-            colorClass[data.Boxinfos[count].LineColor] = []
-        colorClass[data.Boxinfos[count].LineColor].push(data.Boxinfos[count]);
+        if (!lineColorClass.hasOwnProperty(data.Boxinfos[count].LineColor))
+            lineColorClass[data.Boxinfos[count].LineColor] = []
+        lineColorClass[data.Boxinfos[count].LineColor].push(data.Boxinfos[count]);
+        if (!bodyColorClass.hasOwnProperty(data.Boxinfos[count].BodyColor))
+            bodyColorClass[data.Boxinfos[count].BodyColor] = []
+        bodyColorClass[data.Boxinfos[count].BodyColor].push(data.Boxinfos[count]);
     }
-    colors = Object.keys(colorClass);
-    for (var countY = 0; countY < colors.length; countY++) {
-        var boxDataSource = {
-            type: "FeatureCollection",
-            features: []
-        };
-        for (var count = 0; count < colorClass[colors[countY]].length; count++) {
-            boxDataSource.features.push(BoxCreate(colorClass[colors[countY]][count], data.Height));
-        }
-        layers.push({
-            color: colors[countY],
-            borderWidth: 1,
-            label: {
-                enabled: true,
-                dataField: "name"
-            },
-            dataSource: boxDataSource,
-            name: "boxs_" + countY
-        });
-    }
+    //colors = Object.keys(lineColorClass);
+    //for (var countY = 0; countY < colors.length; countY++) {
+    //    var boxDataSource = {
+    //        type: "FeatureCollection",
+    //        features: []
+    //    };
+    //    for (var count = 0; count < lineColorClass[colors[countY]].length; count++) {
+    //        boxDataSource.features.push(BoxCreate(lineColorClass[colors[countY]][count], data.Height, false));
+    //    }
+    //    layers.push({
+    //        color: colors[countY],
+    //        hoverEnabled: false,
+    //        dataSource: boxDataSource,
+    //        name: "boxsBorder" + countY
+    //    });
+    //}
+    //colors = Object.keys(bodyColorClass);
+    //for (var countY = 0; countY < colors.length; countY++) {
+    //    var boxDataSource = {
+    //        type: "FeatureCollection",
+    //        features: []
+    //    };
+    //    for (var count = 0; count < bodyColorClass[colors[countY]].length; count++) {
+    //        boxDataSource.features.push(BoxCreate(bodyColorClass[colors[countY]][count], data.Height, true));
+    //    }
+    //    layers.push({
+    //        color: colors[countY],
+    //        borderWidth: 1,
+    //        label: {
+    //            enabled: true,
+    //            dataField: "name"
+    //        },
+    //        dataSource: boxDataSource,
+    //        name: "boxsBody" + countY
+    //    });
+    //}
     //var layers = [{
     //    color: "#FFFF00",
     //    hoverEnabled: false,
@@ -134,23 +154,33 @@ function BackgroundCreate(backgroundData) {
     }
     return background;
 }
-function BoxCreate(boxData, maxHeight) {
+function BoxCreate(boxData, maxHeight, isBody) {
+    var x = boxData.X;
+    var y = boxData.Y
+    var width = boxData.Width;
+    var height = boxData.Height;
+    if (isBody) {
+        x += boxData.LineWidth;
+        y += boxData.LineWidth;
+        width -= 2 * boxData.LineWidth;
+        height -= 2 * boxData.LineWidth;
+    }
     var box = {
         type: "Feature",
         properties: {
             name: boxData.Name,
-            height: boxData.Height,
-            width: boxData.Width,
-            y: boxData.Y,
-            x: boxData.X
+            height: height,
+            width: width,
+            y: y,
+            x: x
             },
         geometry: {
             type: "Polygon",
             coordinates: [[
-                [boxData.X, maxHeight - boxData.Y],
-                [boxData.X + boxData.Width, maxHeight - boxData.Y],
-                [boxData.X + boxData.Width, maxHeight - (boxData.Y + boxData.Height)],
-                [boxData.X, maxHeight - (boxData.Y + boxData.Height)],
+                [x, maxHeight - y],
+                [x + width, maxHeight - y],
+                [x + width, maxHeight - (y + height)],
+                [x, maxHeight - (y + height)],
             ]]
         }
     }
