@@ -5,8 +5,10 @@ using System.Web;
 using System.Web.Mvc;
 
 namespace DevExtremeProject.Controllers {
-    public class HomeController : Controller {
-        public ActionResult Index() {
+    public partial class HomeController : Controller
+    {
+        public ActionResult Index()
+        {
             return View();
         }
     }
