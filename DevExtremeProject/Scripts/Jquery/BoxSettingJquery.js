@@ -26,8 +26,8 @@ $(document).ready(function () {
                 data = data.replaceAll('\n', '');
                 var temp = JSON.parse(data)
                 var layer = DataPacket(temp);
-                option.layers = layer;
-                $("#TestMap").dxVectorMap(option);
+                vectorMapoption.layers = layer;
+                $("#TestMap").dxVectorMap(vectorMapoption);
                 temp = null;
             },
             failure: function (errMsg) {
@@ -37,7 +37,7 @@ $(document).ready(function () {
         $(this).val(null);
     });
 });
-var option = {
+var vectorMapoption = {
     maxZoomFactor: 4,
     size: {
         width: 1200,
@@ -56,33 +56,61 @@ var option = {
     }
 };
 function DataPacket(data) {
+    var colorClass = {};
+    var colors;
+    var layers = [];
     var backgroundData = {
         type: "FeatureCollection",
         features: []
     };
-    var boxDataSource = {
-        type: "FeatureCollection",
-        features: []
-    };
     backgroundData.features.push(BackgroundCreate(data));
-    for (var count = 0; count < data.Boxinfos.length; count++) {
-        boxDataSource.features.push(BoxCreate(data.Boxinfos[count], data.Height));
-    }
-    var layers = [{
-        color: "#FFFF00",
+    layers.push({
+        color: data.BackgroundColor,
         hoverEnabled: false,
         dataSource: backgroundData,
         name: "background"
-    }, {
-        color: "#FF0000",
-        borderWidth: 1,
-        label: {
-            enabled: true,
-            dataField: "name"
-        },
-        dataSource: boxDataSource,
-        name: "boxs"
-    }];
+    });
+
+    for (var count = 0; count < data.Boxinfos.length; count++) {
+        if (!colorClass.hasOwnProperty(data.Boxinfos[count].LineColor))
+            colorClass[data.Boxinfos[count].LineColor] = []
+        colorClass[data.Boxinfos[count].LineColor].push(data.Boxinfos[count]);
+    }
+    colors = Object.keys(colorClass);
+    for (var countY = 0; countY < colors.length; countY++) {
+        var boxDataSource = {
+            type: "FeatureCollection",
+            features: []
+        };
+        for (var count = 0; count < colorClass[colors[countY]].length; count++) {
+            boxDataSource.features.push(BoxCreate(colorClass[colors[countY]][count], data.Height));
+        }
+        layers.push({
+            color: colors[countY],
+            borderWidth: 1,
+            label: {
+                enabled: true,
+                dataField: "name"
+            },
+            dataSource: boxDataSource,
+            name: "boxs_" + countY
+        });
+    }
+    //var layers = [{
+    //    color: "#FFFF00",
+    //    hoverEnabled: false,
+    //    dataSource: backgroundData,
+    //    name: "background"
+    //}, {
+    //    color: "#FF0000",
+    //    borderWidth: 1,
+    //    label: {
+    //        enabled: true,
+    //        dataField: "name"
+    //    },
+    //    dataSource: boxDataSource,
+    //    name: "boxs"
+    //}];
     return layers;
 }
 function BackgroundCreate(backgroundData) {
