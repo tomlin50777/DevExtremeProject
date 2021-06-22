@@ -4,7 +4,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace DevExtremeProject.Controllers {
+namespace DevExtremeProject.Controllers
+{
     public partial class HomeController : Controller
     {
         public ActionResult Index()
