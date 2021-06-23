@@ -15,7 +15,6 @@ namespace DevExtremeProject {
             // jQuery
             scriptBundle
                 .Include("~/Scripts/jquery-3.5.1.js");
-
             // Bootstrap
             scriptBundle
                 .Include("~/Scripts/bootstrap.js");
